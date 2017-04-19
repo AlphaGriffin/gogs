@@ -89,6 +89,9 @@ func renderDirectory(ctx *context.Context, treeLink string) {
 			case markup.IsMarkdownFile(readmeFile.Name()):
 				ctx.Data["IsMarkdown"] = true
 				buf = markup.Markdown(buf, treeLink, ctx.Repo.Repository.ComposeMetas())
+			case markup.IsRstFile(readmeFile.Name()):
+				ctx.Data["IsRst"] = true
+				buf = markup.Rst(buf, treeLink, ctx.Repo.Repository.ComposeMetas())
 			default:
 				buf = bytes.Replace(buf, []byte("\n"), []byte(`<br>`), -1)
 			}
@@ -155,12 +158,16 @@ func renderFile(ctx *context.Context, entry *git.TreeEntry, treeLink, rawLink st
 
 		isMarkdown := markup.IsMarkdownFile(blob.Name())
 		ctx.Data["IsMarkdown"] = isMarkdown
-		ctx.Data["ReadmeExist"] = isMarkdown && markup.IsReadmeFile(blob.Name())
+		isRst := markup.IsRstFile(blob.Name())
+		ctx.Data["IsRst"] = isRst
+		ctx.Data["ReadmeExist"] = (isMarkdown || isRst) && markup.IsReadmeFile(blob.Name())
 
 		ctx.Data["IsIPythonNotebook"] = strings.HasSuffix(blob.Name(), ".ipynb")
 
 		if isMarkdown {
 			ctx.Data["FileContent"] = string(markup.Markdown(buf, path.Dir(treeLink), ctx.Repo.Repository.ComposeMetas()))
+        } else if isRst {
+			ctx.Data["FileContent"] = string(markup.Rst(buf, path.Dir(treeLink), ctx.Repo.Repository.ComposeMetas()))
 		} else {
 			// Building code view blocks with line number on server side.
 			var fileContent string

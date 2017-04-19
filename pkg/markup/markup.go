@@ -305,6 +305,7 @@ type Type string
 const (
 	UNRECOGNIZED Type = "unrecognized"
 	MARKDOWN     Type = "markdown"
+    RST          Type = "rst"
 	ORG_MODE     Type = "orgmode"
 )
 
@@ -325,6 +326,8 @@ func Render(typ Type, input interface{}, urlPrefix string, metas map[string]stri
 	switch typ {
 	case MARKDOWN:
 		rawHTML = RawMarkdown(rawBytes, urlPrefix)
+    case RST:
+        rawHTML = RawRst(rawBytes, urlPrefix)
 	case ORG_MODE:
 	default:
 		return rawBytes // Do nothing if syntax type is not recognized
